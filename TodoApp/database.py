@@ -6,8 +6,12 @@ from sqlalchemy.orm import sessionmaker
 # ./todo.db — creates/uses a database file named todo.db in the current directory
 
 # SQLALCHEMY_DATABASE_URL = "sqlite:///./todosapp.db"
+# SQLALCHEMY_DATABASE_URL = (
+#     "postgresql://postgres:test1234!@localhost:5434/TodoApplicationDatabase"
+# )
+
 SQLALCHEMY_DATABASE_URL = (
-    "postgresql://postgres:test1234!@localhost:5434/TodoApplicationDatabase"
+    "mysql+pymysql://root:test1234@localhost:3306/todoapplicationdatabase"
 )
 
 # we don't check the same thread because SQLite is not designed for

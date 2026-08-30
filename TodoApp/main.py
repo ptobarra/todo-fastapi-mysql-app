@@ -1,17 +1,30 @@
-import models
-from database import engine
+# import models
 from fastapi import FastAPI
-from routers import admin, auth, todos, users
+
+# from database import engine
+from .database import engine
+from .models import Base
+
+# from routers import admin, auth, todos, users
+from .routers import admin, auth, todos, users
 
 app = FastAPI()
 
-# For now, it is easier to delete our `todos.db` and hten recreate it if we
+# For now, it is easier to delete our `todos.db` and then recreate it if we
 # add anything extra to our todos
 # Alembic Section of Course will teach how to enhance DB without deleting
 # each time.
-models.Base.metadata.create_all(
-    bind=engine
-)  # This creates the database tables based on the models defined in models.py
+# models.Base.metadata.create_all(
+#     bind=engine
+# )  # This creates the database tables based on the models defined in models.py
+
+Base.metadata.create_all(bind=engine)
+
+
+@app.get("/healthy")
+def health_check():
+    return {"status": "Healthy"}
+
 
 app.include_router(auth.router)
 app.include_router(todos.router)
@@ -21,6 +34,8 @@ app.include_router(users.router)
 # .venv/bin/activate
 # cd TodoApp/
 # uvicorn main:app --reload
+# now to execute from the root folder
+# uvicorn TodoApp.main:app --reload
 
 # $ sudo apt install sqlite3
 # $ which sqlite3

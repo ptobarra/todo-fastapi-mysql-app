@@ -1,6 +1,6 @@
 [tool.ruff]
 line-length = 88
-target-version = "py311"
+target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B"] # pyflakes, pycodestyle, isort, pyupgrade, bugbear
@@ -9,3 +9,7 @@ ignore = []
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
+
+[tool.pytest.ini_options]
+testpaths = ["TodoApp/test"]
+asyncio_mode = "strict"

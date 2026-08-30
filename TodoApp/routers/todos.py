@@ -1,16 +1,17 @@
 from typing import Annotated
 
-# from database import engine
-from database import SessionLocal
-
 # from fastapi import FastAPI
 from fastapi import APIRouter, Depends, HTTPException, Path, status
-
-# import models
-from models import Todos
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 
+# from database import engine
+# from database import SessionLocal
+from ..database import SessionLocal
+
+# import models
+# from models import Todos
+from ..models import Todos
 from .auth import get_current_user
 
 # from routers import auth

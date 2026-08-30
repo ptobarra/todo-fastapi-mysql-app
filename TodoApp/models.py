@@ -15,9 +15,11 @@
 # represent the columns of the table.
 
 # We are going to be creating this model for our database.py file.
-from database import Base
+# from database import Base
 from sqlalchemy import Boolean, ForeignKey, Integer, String
 from sqlalchemy.orm import Mapped, mapped_column
+
+from .database import Base
 
 
 class Users(Base):
@@ -31,7 +33,7 @@ class Users(Base):
     hashed_password: Mapped[str] = mapped_column(String)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     role: Mapped[str] = mapped_column(String)
-    # phone_number: Mapped[str] = mapped_column(String)
+    phone_number: Mapped[str] = mapped_column(String)
 
 
 class Todos(Base):

@@ -1,9 +1,11 @@
 from typing import Annotated
 
 # from fastapi import FastAPI
-from fastapi import APIRouter, Depends, HTTPException, Path, status
+from fastapi import APIRouter, Depends, HTTPException, Path, Request, status
+from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
+from starlette.responses import RedirectResponse
 
 # from database import engine
 # from database import SessionLocal
@@ -16,8 +18,10 @@ from .auth import get_current_user
 
 # from routers import auth
 
+templates = Jinja2Templates(directory="TodoApp/templates")
+
 # app = FastAPI()
-router = APIRouter()
+router = APIRouter(prefix="/todos", tags=["todos"])
 
 # For now, it is easier to delete our `todos.db` and hten recreate it if we
 # add anything extra to our todos
@@ -72,6 +76,88 @@ class TodoRequest(BaseModel):
     description: str = Field(min_length=3, max_length=100)
     priority: int = Field(gt=0, lt=6)
     complete: bool
+
+
+def redirect_to_login():
+    redirect_response = RedirectResponse(
+        url="/auth/login-page", status_code=status.HTTP_302_FOUND
+    )
+    redirect_response.delete_cookie(key="access_token")
+    return redirect_response
+
+
+### PAGES ###
+
+
+@router.get("/todo-page")
+async def render_todo_page(request: Request, db: db_dependency):
+    token = request.cookies.get("access_token")
+
+    if not token:
+        return redirect_to_login()
+
+    try:
+        user = await get_current_user(token)
+        todos = db.query(Todos).filter(Todos.owner_id == user.get("id")).all()
+
+        return templates.TemplateResponse(
+            request=request,
+            name="todo.html",
+            context={"todos": todos, "user": user},
+        )
+    except (HTTPException, ValueError, TypeError):
+        return redirect_to_login()
+
+
+@router.get("/add-todo-page")
+async def render_add_todo_page(request: Request):
+    token = request.cookies.get("access_token")
+
+    if not token:
+        return redirect_to_login()
+
+    try:
+        user = await get_current_user(token)
+
+        if user is None:
+            return redirect_to_login()
+
+        return templates.TemplateResponse(
+            request=request,
+            name="add-todo.html",
+            context={"request": request, "user": user},
+        )
+
+    except (HTTPException, ValueError, TypeError):
+        return redirect_to_login()
+
+
+@router.get("/edit-todo-page/{todo_id}")
+async def render_edit_todo_page(request: Request, todo_id: int, db: db_dependency):
+    token = request.cookies.get("access_token")
+
+    if not token:
+        return redirect_to_login()
+
+    try:
+        user = await get_current_user(token)
+
+        if user is None:
+            return redirect_to_login()
+
+        todo = db.query(Todos).filter(Todos.id == todo_id).first()
+
+        return templates.TemplateResponse(
+            request=request,
+            name="edit-todo.html",
+            context={"request": request, "todo": todo, "user": user},
+        )
+
+    except (HTTPException, ValueError, TypeError):
+        return redirect_to_login()
+
+
+### ENDPOINTS ###
 
 
 # Depends is dependency injection (we've to do something before we execute

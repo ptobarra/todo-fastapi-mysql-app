@@ -5,12 +5,13 @@ Updated todo list FastAPI Todo app built while learning from **FastAPI - The Com
 ## Features
 
 - **JWT authentication** — register, log in, and receive an OAuth2 bearer token (`/auth`)
-- **Per-user todos** — authenticated users can create, read, update, and delete their own todo items (`/todos`)
+- **Per-user todos** — authenticated users can create, read, update, complete, and delete their own todo items (`/todos`)
 - **Server-rendered web UI** — Jinja2 + Bootstrap pages for login, registration, and listing/adding/editing todos, backed by a cookie-stored JWT (`access_token`)
 - **User management** — view your profile, change your password, and update your phone number (`/user`)
 - **Admin endpoints** — role-restricted access to view and delete any user's todos (`/admin`)
 - **SQLAlchemy ORM models** for `Users` and `Todos`, with a `Todos.owner_id` relationship
-- **Password hashing** with `passlib`/`bcrypt`; database-backed via SQLAlchemy, with MySQL as the target database (SQLite/PostgreSQL also usable during development)
+- **Password hashing** with `passlib`/`bcrypt`; database-backed via SQLAlchemy, configured from a single `DATABASE_URL` environment variable so the same code runs against MySQL locally and PostgreSQL in production
+- **Deployed on [Render.com](https://render.com/)** — `TodoApp/database.py` reads `DATABASE_URL` via `python-dotenv` (from a local `.env` file) or from Render's dashboard-configured environment variable in production
 - **Alembic migrations** — schema changes are tracked as versioned migration scripts instead of relying on `create_all`
 - **Health check** endpoint (`/healthy`)
 - **Test suite** — unit and integration tests (`pytest`) covering auth, todos, users, and admin routes against an isolated SQLite test database
@@ -20,7 +21,8 @@ Updated todo list FastAPI Todo app built while learning from **FastAPI - The Com
 - [FastAPI](https://fastapi.tiangolo.com/)
 - [SQLAlchemy](https://www.sqlalchemy.org/) ORM
 - [Alembic](https://alembic.sqlalchemy.org/) for database migrations
-- MySQL (via `PyMySQL`) — SQLite and PostgreSQL supported as alternate backends
+- MySQL (via `PyMySQL`) for local development, PostgreSQL (via `psycopg2-binary`) in production on Render — SQLite also usable during development
+- [python-dotenv](https://github.com/theskumar/python-dotenv) to load `DATABASE_URL` from a local `.env` file
 - [python-jose](https://github.com/mpdavis/python-jose) for JWT tokens
 - [passlib](https://passlib.readthedocs.io/) + `bcrypt` for password hashing
 - [Pydantic](https://docs.pydantic.dev/) for request/response validation
@@ -71,7 +73,7 @@ Updated todo list FastAPI Todo app built while learning from **FastAPI - The Com
 ### Prerequisites
 
 - Python 3.12+
-- A MySQL server (or adjust `TodoApp/database.py` to point at SQLite/PostgreSQL instead)
+- A MySQL server for local development (or point `DATABASE_URL` at SQLite/PostgreSQL instead)
 
 ### Setup
 
@@ -90,11 +92,14 @@ pip install -r requirements.txt
 
 ### Configure the database
 
-Update the `SQLALCHEMY_DATABASE_URL` in [TodoApp/database.py](TodoApp/database.py) with your own database credentials, e.g.:
+[TodoApp/database.py](TodoApp/database.py) builds `SQLALCHEMY_DATABASE_URL` from a `DATABASE_URL` environment variable, loaded via `python-dotenv` from a `.env` file in the repo root (not committed to git). Create one with your own database credentials, e.g. for local MySQL:
 
-```python
-SQLALCHEMY_DATABASE_URL = "mysql+pymysql://<user>:<password>@localhost:3306/<database>"
+```bash
+# .env
+DATABASE_URL=mysql+pymysql://<user>:<password>@localhost:3306/<database>
 ```
+
+In production on Render, `DATABASE_URL` is instead set as an environment variable in the Render dashboard (typically a `postgresql://...` URL), and `.env` is not used.
 
 ### Run database migrations
 
@@ -134,6 +139,8 @@ Alongside the JSON API, the app serves a small server-rendered UI (Jinja2 templa
 | `/todos/edit-todo-page/{todo_id}`  | Form to edit/delete an existing todo           |
 
 The login page posts credentials to `/auth/token` and stores the returned JWT in an `access_token` cookie; the page routes above read that cookie server-side (redirecting to `/auth/login-page` if it's missing or invalid), while the page's own JavaScript (`static/js/base.js`) sends it as an `Authorization: Bearer` header when calling the JSON API to create/update/delete todos. Logging out clears the cookie client-side.
+
+Each row on the todo list page also has a **Complete** button that sends a `PUT /todos/todo/{todo_id}` request with `complete: true` and reloads the page on success.
 
 ## API Overview
 

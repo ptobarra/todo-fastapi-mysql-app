@@ -13,13 +13,19 @@ from sqlalchemy.orm import sessionmaker
 #     "postgresql://postgres:test1234!@localhost:5434/TodoApplicationDatabase"
 # )
 
-# TODO: uncomment the 3 lines below to run the server locally (value also stored in the .env local variable)
+# That keeps your local WSL setup on MySQL exactly as it is now, while
+# production on Render uses Postgres via the DATABASE_URL env var — same code,
+# different environment.
+
+# TODO: uncomment the 3 lines below to run the server locally (value also stored in the
+# .env local variable)
 # SQLALCHEMY_DATABASE_URL = (
 #     "mysql+pymysql://root:test1234@localhost:3306/todoapplicationdatabase"
 # )
 
 # TODO: the 2 lines below are to run the server on the render.com service
-load_dotenv()  # loads .env locally; on Render, env vars are already set in the dashboard
+load_dotenv()  # loads .env locally; on Render, env vars are already set
+# in the dashboard
 SQLALCHEMY_DATABASE_URL = os.environ["DATABASE_URL"]
 
 # we don't check the same thread because SQLite is not designed for

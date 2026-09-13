@@ -119,8 +119,46 @@
             }
         });
 
-        
+
     }
+
+    // Complete Todo JS
+    document.querySelectorAll('.complete-btn').forEach(function (btn) {
+        btn.addEventListener('click', async function () {
+            const payload = {
+                title: btn.dataset.title,
+                description: btn.dataset.description,
+                priority: parseInt(btn.dataset.priority),
+                complete: true
+            };
+
+            try {
+                const token = getCookie('access_token');
+                if (!token) {
+                    throw new Error('Authentication token not found');
+                }
+
+                const response = await fetch(`/todos/todo/${btn.dataset.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (response.ok) {
+                    window.location.reload();
+                } else {
+                    const errorData = await response.json();
+                    alert(`Error: ${errorData.detail}`);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            }
+        });
+    });
 
     // Login JS
     const loginForm = document.getElementById('loginForm');

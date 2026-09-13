@@ -29,6 +29,16 @@
                     <td>{{loop.index}}</td>
                     <td>{{todo.title}}</td>
                     <td>
+                        <button
+                            type="button"
+                            class="btn btn-success complete-btn"
+                            data-id="{{todo.id}}"
+                            data-title="{{todo.title}}"
+                            data-description="{{todo.description}}"
+                            data-priority="{{todo.priority}}"
+                        >
+                            Complete
+                        </button>
                         <button onclick="window.location.href='edit-todo-page/{{todo.id}}'" type="button" class="btn btn-info">
                             Edit
                         </button>
